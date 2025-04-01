@@ -42,6 +42,4 @@ After training, the model's performance is evaluated using various metrics:
 - **Confusion Matrix**: A matrix that shows the performance of the classification model by comparing predicted and actual labels.
 
 The performance of the model can be plotted using various graphs, such as loss curves and accuracy curves, to visualize the training process and evaluate the model's behavior over epochs.
-
-## Usage
-1. Clone the repository:
+y:
