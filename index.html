@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spam SMS Detection</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📩 Spam SMS Detector</h1>
+    <form id="smsForm">
+      <textarea id="message" placeholder="Enter your message..." rows="6"></textarea>
+      <div class="char-count" id="charCount">0 characters</div>
+      <button type="submit">Check</button>
+    </form>
+    <div class="loader" id="loader"></div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('smsForm');
+    const messageInput = document.getElementById('message');
+    const resultDiv = document.getElementById('result');
+    const loader = document.getElementById('loader');
+    const charCount = document.getElementById('charCount');
+
+    messageInput.addEventListener('input', () => {
+      charCount.textContent = `${messageInput.value.length} characters`;
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return alert("Please enter a message.");
+
+      loader.style.display = 'block';
+      resultDiv.innerText = '';
+
+      try {
+        const res = await fetch('/api/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        resultDiv.innerText = `Result: ${data.prediction.toUpperCase()}`;
+      } catch (err) {
+        resultDiv.innerText = 'Error processing request.';
+      } finally {
+        loader.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
