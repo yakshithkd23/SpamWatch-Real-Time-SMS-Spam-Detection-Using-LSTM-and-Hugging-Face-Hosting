@@ -1,45 +1,53 @@
 import os
-import json
-import re
-import pickle
+import gdown
 import numpy as np
+import re
+from flask import Flask, request, jsonify
 from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# Load model & tokenizer once
-model = load_model(os.path.join(os.path.dirname(__file__), '../model/lstm_model.h5'))
-with open(os.path.join(os.path.dirname(__file__), '../model/tokenizer.pkl'), 'rb') as f:
-    tokenizer = pickle.load(f)
+app = Flask(__name__)
 
-max_len = 100
+# Constants
+MODEL_URL = "https://drive.google.com/uc?export=download&id=16_6LmSP5fqTjGSjGujsre8CHR81Bhwc5"
+MODEL_PATH = "lstm_model.h5"
+MAX_WORDS = 5000
+MAX_LEN = 100
+
+# Download the model if not already present
+if not os.path.exists(MODEL_PATH):
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+
+# Load the model
+model = load_model(MODEL_PATH)
+
+# Initialize the tokenizer (ensure this is the same tokenizer used during training)
+tokenizer = Tokenizer(num_words=MAX_WORDS, oov_token="<OOV>")
 
 def clean_text(text):
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
-    text = re.sub(r'\d+', '', text)
+    """Preprocess the input text."""
+    text = text.lower()  # Convert to lowercase
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)  # Remove special characters
+    text = re.sub(r'\d+', '', text)  # Remove numbers
     return text
 
-def handler(request):
-    if request.method == "POST":
-        try:
-            body = json.loads(request.body)
-            message = body.get("message", "")
-            cleaned = clean_text(message)
-            sequence = tokenizer.texts_to_sequences([cleaned])
-            padded = pad_sequences(sequence, maxlen=max_len)
-            prediction = model.predict(padded)
-            result = "Spam" if prediction[0][0] > 0.5 else "Ham"
-            return {
-                "statusCode": 200,
-                "body": json.dumps({"result": result})
-            }
-        except Exception as e:
-            return {
-                "statusCode": 500,
-                "body": json.dumps({"error": str(e)})
-            }
+def prepare_input(text):
+    """Tokenize and pad the input text."""
+    sequences = tokenizer.texts_to_sequences([text])
+    padded = pad_sequences(sequences, maxlen=MAX_LEN)
+    return padded
 
-    return {
-        "statusCode": 405,
-        "body": json.dumps({"error": "Method not allowed"})
-    }
+@app.route('/predict', methods=['POST'])
+def predict():
+    """API endpoint for predicting spam or ham."""
+    data = request.get_json()
+    message = data.get("message", "")
+    cleaned_message = clean_text(message)
+    input_data = prepare_input(cleaned_message)
+    prediction = model.predict(input_data)
+    result = "spam" if prediction[0][0] > 0.5 else "ham"
+    return jsonify({"prediction": result})
+
+if __name__ == '__main__':
+    app.run(debug=True)
