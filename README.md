@@ -1,5 +1,4 @@
-# Spam Message Classification with LSTM  -    http://doi.one/10.1729/Journal.44657
-
+# Spam Message Classification with LSTM  
 This repository contains a spam message classification project using a Long Short-Term Memory (LSTM) model. The project aims to classify text messages into two categories: **Spam** or **Ham** (non-spam). The model is built using the TensorFlow and Keras libraries, along with several data preprocessing techniques.
 
 ## Sections of the Project
@@ -43,3 +42,6 @@ After training, the model's performance is evaluated using various metrics:
 
 The performance of the model can be plotted using various graphs, such as loss curves and accuracy curves, to visualize the training process and evaluate the model's behavior over epochs.
 y:
+reference: 
+   http://doi.one/10.1729/Journal.44657
+
