@@ -42,6 +42,4 @@ After training, the model's performance is evaluated using various metrics:
 
 The performance of the model can be plotted using various graphs, such as loss curves and accuracy curves, to visualize the training process and evaluate the model's behavior over epochs.
 y:
-reference: 
-   http://doi.one/10.1729/Journal.44657
 
